@@ -1,0 +1,76 @@
+# One-command local stack for DLottery: chain + Postgres + backend indexer + frontend.
+#
+#   docker compose up --build
+#
+# Then open http://localhost:5173 and point your wallet at http://localhost:8545
+# (chain id 31337). The deterministic deployment addresses are baked into the defaults.
+
+services:
+  # Local EVM chain with USD8 + DLottery auto-deployed (deterministic addresses).
+  chain:
+    build:
+      context: ./contracts
+    ports:
+      - "8545:8545"
+    environment:
+      # Seed a few default Hardhat accounts with USD8 for testing.
+      FAUCET_RECIPIENTS: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8,0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC,0x90F79bf6EB2c4f870365E785982E1f101E93b906"
+      MIN_PARTICIPANTS: "2"
+      TICKET_PRICE: "10"
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: dlottery
+      POSTGRES_PASSWORD: dlottery
+      POSTGRES_DB: dlottery
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dlottery"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      chain:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgres://dlottery:dlottery@postgres:5432/dlottery
+      RPC_URL: http://chain:8545
+      # Deterministic DLottery address on a fresh Hardhat deployment.
+      CONTRACT_ADDRESS: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+      START_BLOCK: "0"
+      # Hardhat mines a block per tx and never reorgs, so index immediately (0 confirmations).
+      # On a real network use a value like 3+ (the code default).
+      CONFIRMATIONS: "0"
+      REORG_DEPTH: "5"
+      POLL_INTERVAL_SECS: "3"
+      HTTP_ADDR: "0.0.0.0:8080"
+      RUST_LOG: "info,dlottery_backend=debug,sqlx=warn"
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_CHAIN_ID: "31337"
+        VITE_RPC_URL: "http://localhost:8545"
+        VITE_USD8_ADDRESS: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+        VITE_CONTRACT_ADDRESS: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+        VITE_BACKEND_URL: "http://localhost:8080"
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  pgdata:

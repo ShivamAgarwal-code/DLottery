@@ -1,0 +1,38 @@
+[package]
+name = "dlottery-backend"
+version = "1.1.0"
+edition = "2021"
+description = "DLottery blockchain event indexer and REST query service (PRD section 3)"
+license = "MIT"
+
+[[bin]]
+name = "dlottery-backend"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+axum = "0.7"
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sqlx = { version = "0.8", default-features = false, features = [
+    "runtime-tokio-rustls",
+    "postgres",
+    "chrono",
+    "macros",
+    "migrate",
+] }
+chrono = { version = "0.4", features = ["serde"] }
+# alloy is used only for ABI/event decoding (sol! + primitives). RPC I/O is done over
+# plain JSON-RPC with reqwest to keep the dependency surface small and version-stable.
+alloy = { version = "0.8", features = ["sol-types", "json-abi"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+anyhow = "1"
+thiserror = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+dotenvy = "0.15"
+
+[profile.release]
+opt-level = 2

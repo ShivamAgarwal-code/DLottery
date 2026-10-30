@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import type { Address } from "viem";
-import { DLotteryAbi, LOTTERY_ADDRESS, DrawStatus } from "../config";
+import { DLotteryAbi, LOTTERY_ADDRESS, DrawStatus, CHAIN_ID } from "../config";
 import type { Draw } from "../hooks/useLottery";
 import { formatUSD8, shortAddress, sameAddress } from "../lib/format";
 
@@ -28,7 +28,7 @@ export function ResultView({ draw, account, onChanged }: Props) {
     // No-winner result (PRD 4.5): lucky number, status, rollover, next-draw info.
     return (
       <div className="card result no-winner">
-        <h3>Draw #{draw.id.toString()} — No Winner</h3>
+        <h3>Draw #{draw.id.toString()} - No Winner</h3>
         <div className="lucky-reveal">
           <span className="lucky-label">Lucky number</span>
           <span className="lucky-ball nowin">{draw.luckyNumber}</span>
@@ -39,7 +39,7 @@ export function ResultView({ draw, account, onChanged }: Props) {
           <Stat label="Rolled over to next draw" value={`${formatUSD8(draw.totalPool)} USD8`} />
           <Stat label="Next draw" value={`#${(draw.id + 1n).toString()}`} />
         </div>
-        <p className="notice">No ticket matched the lucky number — the pool rolls into the next draw.</p>
+        <p className="notice">No ticket matched the lucky number - the pool rolls into the next draw.</p>
       </div>
     );
   }
@@ -47,7 +47,7 @@ export function ResultView({ draw, account, onChanged }: Props) {
   // Winner result (PRD 4.5): winner, lucky number, pool, DAO fee, claimable, claim action.
   return (
     <div className="card result winner">
-      <h3>Draw #{draw.id.toString()} — We Have a Winner! 🎉</h3>
+      <h3>Draw #{draw.id.toString()} - We Have a Winner! 🎉</h3>
       <div className="lucky-reveal">
         <span className="lucky-label">Lucky number</span>
         <span className="lucky-ball win">{draw.luckyNumber}</span>
@@ -65,6 +65,7 @@ export function ResultView({ draw, account, onChanged }: Props) {
           disabled={busy}
           onClick={() =>
             claim.writeContract({
+              chainId: CHAIN_ID,
               address: LOTTERY_ADDRESS,
               abi: DLotteryAbi,
               functionName: "claimPrize",

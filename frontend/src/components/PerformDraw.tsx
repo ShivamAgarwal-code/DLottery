@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { DLotteryAbi, LOTTERY_ADDRESS } from "../config";
+import { DLotteryAbi, LOTTERY_ADDRESS, CHAIN_ID } from "../config";
 
 interface Props {
   onChanged: () => void;
@@ -31,6 +31,7 @@ export function PerformDraw({ onChanged }: Props) {
         disabled={busy}
         onClick={() =>
           draw.writeContract({
+            chainId: CHAIN_ID,
             address: LOTTERY_ADDRESS,
             abi: DLotteryAbi,
             functionName: "performDraw",

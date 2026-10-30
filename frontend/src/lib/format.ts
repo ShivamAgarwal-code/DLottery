@@ -12,7 +12,7 @@ export function formatUSD8(value: bigint | string | undefined | null, dp = 2): s
 }
 
 export function shortAddress(addr?: string | null): string {
-  if (!addr) return "—";
+  if (!addr) return "-";
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
 }
 
@@ -57,7 +57,7 @@ export function formatDuration(totalSeconds: number): string {
 
 export function formatTimestamp(unixSeconds: number | bigint): string {
   const n = typeof unixSeconds === "bigint" ? Number(unixSeconds) : unixSeconds;
-  if (!n) return "—";
+  if (!n) return "-";
   return new Date(n * 1000).toLocaleString();
 }
 

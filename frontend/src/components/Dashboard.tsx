@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { useCurrentDraw, useUSD8 } from "../hooks/useLottery";
 import { DrawStatus } from "../config";
-import { formatUSD8, formatDuration, statusLabel, statusClass } from "../lib/format";
+import { formatUSD8, statusLabel, statusClass } from "../lib/format";
 import { AllocationTable } from "./AllocationTable";
 import { BuyTicket } from "./BuyTicket";
 import { PerformDraw } from "./PerformDraw";
@@ -41,61 +41,97 @@ export function Dashboard() {
   }
 
   if (isLoading || !draw) {
-    return <div className="card"><p>Loading current draw…</p></div>;
+    return (
+      <div className="card" style={{ textAlign: "center" }}>
+        <span className="spinner-row">
+          <span className="spinner" /> Loading current draw…
+        </span>
+      </div>
+    );
   }
 
   const isActive = draw.status === DrawStatus.Active;
+  const pool = isActive ? draw.rollover + draw.participantCount * draw.ticketPrice : draw.totalPool;
+  const participants = Number(draw.participantCount);
+  const pct = Math.min(100, (participants / 5) * 100);
 
   return (
     <div className="dashboard">
-      <div className="card draw-summary">
-        <div className="summary-header">
-          <div>
-            <span className="muted">Current Draw</span>
-            <h2>#{draw.id.toString()}</h2>
-          </div>
+      {/* Hero prize */}
+      <section className="hero">
+        <div className="hero-top">
+          <span className="hero-draw-id">Draw #{draw.id.toString()}</span>
           <span className={statusClass(draw.status)}>{statusLabel(draw.status)}</span>
         </div>
 
-        <div className="summary-stats">
-          <Stat label="Ticket price" value={`${formatUSD8(draw.ticketPrice)} USD8`} />
-          <Stat
-            label="Participants"
-            value={`${draw.participantCount.toString()} / 5`}
-            sub={`min ${draw.minParticipants}`}
-          />
-          <Stat label="Prize pool" value={`${formatUSD8(poolSoFar(draw))} USD8`} sub={`rollover ${formatUSD8(draw.rollover)}`} />
-          <Stat
-            label="Time remaining"
-            value={isActive ? formatDuration(remaining) : "—"}
-          />
+        <div className="hero-label">Current Prize Pool</div>
+        <div className="hero-prize">
+          {formatUSD8(pool)}
+          <span className="unit">USD8</span>
+        </div>
+        <div className="hero-sub">
+          {formatUSD8(draw.rollover)} USD8 rolled over · {formatUSD8(draw.ticketPrice)} USD8 per ticket
+        </div>
+
+        {isActive ? (
+          <Countdown seconds={remaining} />
+        ) : (
+          <div className="countdown-closed">Draw closed</div>
+        )}
+
+        <div className="progress-wrap">
+          <div className="progress-meta">
+            <span>{participants} / 5 players</span>
+            <span>min {draw.minParticipants} to settle</span>
+          </div>
+          <div className="progress-track">
+            <div className="progress-fill" style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+
+        <div className="hero-chips">
+          <Chip label="Ticket" value={`${formatUSD8(draw.ticketPrice)} USD8`} />
+          <Chip label="Players" value={`${participants}/5`} />
+          <Chip label="Rollover" value={`${formatUSD8(draw.rollover)}`} />
+          <Chip label="Numbers" value="1-10" />
+        </div>
+      </section>
+
+      {/* Allocation + action */}
+      <div className="main-grid">
+        <AllocationTable allocation={allocation} myAddress={address} />
+
+        <div>
+          {address ? (
+            isActive ? (
+              isEligible ? (
+                <PerformDraw onChanged={refreshAll} />
+              ) : (
+                <BuyTicket
+                  draw={draw}
+                  allocation={allocation}
+                  myTicket={myTicket}
+                  balance={usd8.balance}
+                  allowance={usd8.allowance}
+                  timeRemaining={remaining}
+                  onChanged={refreshAll}
+                />
+              )
+            ) : (
+              <div className="card">
+                <h3>Draw settling</h3>
+                <p className="notice">This draw has closed. The result appears below.</p>
+              </div>
+            )
+          ) : (
+            <div className="card connect-prompt">
+              <div className="big-emoji">🔐</div>
+              <h3>Connect to play</h3>
+              <p>Connect your wallet to buy a ticket and join the draw.</p>
+            </div>
+          )}
         </div>
       </div>
-
-      <AllocationTable allocation={allocation} myAddress={address} />
-
-      {/* Interaction area: buy, or draw when eligible */}
-      {address ? (
-        isActive ? (
-          isEligible ? (
-            <PerformDraw onChanged={refreshAll} />
-          ) : (
-            <BuyTicket
-              draw={draw}
-              allocation={allocation}
-              myTicket={myTicket}
-              balance={usd8.balance}
-              allowance={usd8.allowance}
-              timeRemaining={remaining}
-              onChanged={refreshAll}
-            />
-          )
-        ) : null
-      ) : (
-        <div className="card">
-          <p className="notice">Connect your wallet to buy a ticket and take part in the draw.</p>
-        </div>
-      )}
 
       {/* Result / refund view for the most recent settled draw (PRD 4.5) */}
       <LatestResult currentDrawId={draw.id} account={address} onChanged={refreshAll} />
@@ -103,24 +139,35 @@ export function Dashboard() {
   );
 }
 
-// Live pool estimate for an active draw = rollover + participants * ticketPrice.
-function poolSoFar(draw: {
-  rollover: bigint;
-  participantCount: bigint;
-  ticketPrice: bigint;
-  totalPool: bigint;
-  status: number;
-}): bigint {
-  if (draw.status !== DrawStatus.Active) return draw.totalPool;
-  return draw.rollover + draw.participantCount * draw.ticketPrice;
+function Countdown({ seconds }: { seconds: number }) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  if (seconds <= 0) return <div className="countdown-closed">Window closed - ready to draw</div>;
+  return (
+    <div className="countdown">
+      <Box num={pad(h)} unit="hrs" />
+      <Box num={pad(m)} unit="min" />
+      <Box num={pad(s)} unit="sec" />
+    </div>
+  );
 }
 
-function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function Box({ num, unit }: { num: string; unit: string }) {
   return (
-    <div className="summary-stat">
-      <span className="summary-stat-label">{label}</span>
-      <span className="summary-stat-value">{value}</span>
-      {sub && <span className="summary-stat-sub">{sub}</span>}
+    <div className="count-box">
+      <div className="count-num">{num}</div>
+      <span className="count-unit">{unit}</span>
+    </div>
+  );
+}
+
+function Chip({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="chip">
+      <span className="chip-label">{label}</span>
+      <span className="chip-value">{value}</span>
     </div>
   );
 }

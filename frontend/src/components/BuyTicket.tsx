@@ -7,6 +7,7 @@ import {
   USD8Abi,
   USD8_ADDRESS,
   DrawStatus,
+  CHAIN_ID,
 } from "../config";
 import type { Draw } from "../hooks/useLottery";
 import { formatUSD8, isZeroAddress } from "../lib/format";
@@ -70,7 +71,7 @@ export function BuyTicket({
         <h3>Your Ticket</h3>
         <div className="my-ticket">
           <span className="my-ticket-number">{myTicket}</span>
-          <p>You're in this draw. One ticket per wallet — good luck! 🍀</p>
+          <p>You're in this draw. One ticket per wallet - good luck! 🍀</p>
         </div>
       </div>
     );
@@ -89,6 +90,7 @@ export function BuyTicket({
 
   const handleApprove = () => {
     approve.writeContract({
+      chainId: CHAIN_ID,
       address: USD8_ADDRESS,
       abi: USD8Abi,
       functionName: "approve",
@@ -99,6 +101,7 @@ export function BuyTicket({
   const handleBuy = () => {
     if (selected === null) return;
     buy.writeContract({
+      chainId: CHAIN_ID,
       address: LOTTERY_ADDRESS,
       abi: DLotteryAbi,
       functionName: "buyTicket",

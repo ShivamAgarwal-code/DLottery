@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 import type { Address } from "viem";
-import { DLotteryAbi, LOTTERY_ADDRESS } from "../config";
+import { DLotteryAbi, LOTTERY_ADDRESS, CHAIN_ID } from "../config";
 import type { Draw } from "../hooks/useLottery";
 import { formatUSD8 } from "../lib/format";
 
@@ -45,7 +45,7 @@ export function RefundView({ draw, account, onChanged }: Props) {
 
   return (
     <div className="card result cancelled">
-      <h3>Draw #{draw.id.toString()} — Cancelled</h3>
+      <h3>Draw #{draw.id.toString()} - Cancelled</h3>
       <div className="result-grid">
         <Stat label="Status" value="Cancelled (insufficient participants)" />
         <Stat label="Participants" value={`${draw.participantCount.toString()} / min ${draw.minParticipants}`} />
@@ -60,6 +60,7 @@ export function RefundView({ draw, account, onChanged }: Props) {
           disabled={busy || alreadyClaimed}
           onClick={() =>
             claim.writeContract({
+              chainId: CHAIN_ID,
               address: LOTTERY_ADDRESS,
               abi: DLotteryAbi,
               functionName: "claimRefund",

@@ -66,9 +66,9 @@ export function History() {
                     </span>
                   </td>
                   <td>{formatTimestamp(d.start_time)}</td>
-                  <td>{d.lucky_number ?? "—"}</td>
+                  <td>{d.lucky_number ?? "-"}</td>
                   <td title={d.winner_address ?? ""}>
-                    {d.winner_address ? shortAddress(d.winner_address) : "—"}
+                    {d.winner_address ? shortAddress(d.winner_address) : "-"}
                   </td>
                   <td>{formatUSD8(d.total_prize_pool)}</td>
                   <td>{formatUSD8(d.dao_fee)}</td>

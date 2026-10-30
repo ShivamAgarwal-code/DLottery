@@ -1,4 +1,4 @@
-# DLottery — Smart Contracts
+# DLottery - Smart Contracts
 
 Hardhat project containing the authoritative on-chain logic (PRD section 2).
 
@@ -13,19 +13,19 @@ Hardhat project containing the authoritative on-chain logic (PRD section 2).
 
 Every requirement is referenced inline in `contracts/DLottery.sol`. Summary:
 
-- **Draw management (SC-01–06):** `constructor` initialises config and starts draw 1;
+- **Draw management (SC-01-06):** `constructor` initialises config and starts draw 1;
   `_startNewDraw` assigns unique monotonic ids, records start time, enforces that the
   previous draw is finalized, carries rollover forward, and manages status transitions.
-- **Ticket management (SC-07–13):** `buyTicket` accepts USD8, validates status + 24h
-  deadline, enforces max 5 participants, one ticket per wallet, number range 1–10, no
+- **Ticket management (SC-07-13):** `buyTicket` accepts USD8, validates status + 24h
+  deadline, enforces max 5 participants, one ticket per wallet, number range 1-10, no
   duplicate numbers, and emits `TicketBought`.
-- **Settlement (SC-14–20):** `performDraw` is only callable when eligible (full or expired),
+- **Settlement (SC-14-20):** `performDraw` is only callable when eligible (full or expired),
   verifies the minimum, generates the lucky number, records a winner or marks `NoWinner`,
   and rolls the pool over when there is no winner.
-- **Prize & refunds (SC-21–26):** `claimPrize` pays the DAO fee + winner once, winner-only;
+- **Prize & refunds (SC-21-26):** `claimPrize` pays the DAO fee + winner once, winner-only;
   `claimRefund` returns principal for cancelled rounds, once per participant.
 
-## Economics (PRD 5.4–5.6)
+## Economics (PRD 5.4-5.6)
 
 ```
 P_total        = rollover + (participants × ticketPrice)
@@ -34,7 +34,7 @@ DAO Fee        = Net Profit × 5%
 Winner Prize   = P_total − DAO Fee
 ```
 
-Worked example (rollover 20, 5 players, price 10): pool 70, fee 3, winner 67 — asserted in tests.
+Worked example (rollover 20, 5 players, price 10): pool 70, fee 3, winner 67 - asserted in tests.
 
 ## Randomness
 

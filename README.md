@@ -1,4 +1,4 @@
-# DLottery — Decentralized Lottery (MVP)
+# DLottery - Decentralized Lottery (MVP)
 
 A full implementation of the **DLottery** PRD (v1.1): a decentralized lottery on an
 EVM-compatible blockchain where users buy numbered tickets with the **USD8** token and every
@@ -12,16 +12,16 @@ stack.
 | Frontend      | React + Vite + wagmi/viem              | `frontend/`  |
 
 > The smart contract is the authoritative source of all lottery and financial state. The
-> backend is a **passive** indexer — it never determines results or controls funds.
+> backend is a **passive** indexer - it never determines results or controls funds.
 
 ## Core rules (PRD 1.3)
 
-Payment token USD8 · ticket price 10 USD8 · max 5 participants · numbers 1–10 · one ticket
+Payment token USD8 · ticket price 10 USD8 · max 5 participants · numbers 1-10 · one ticket
 per wallet · 24-hour draws · configurable minimum · draw triggers at 5 participants or
 timeout · below minimum ⇒ cancelled + refunds · winner matches the lucky number · no winner
 ⇒ rollover · DAO fee = 5% of the winner's net profit.
 
-### Economics (PRD 5.4–5.6)
+### Economics (PRD 5.4-5.6)
 
 ```
 P_total      = rollover + participants × ticketPrice
@@ -30,10 +30,10 @@ DAO Fee      = Net Profit × 5%
 Winner Prize = P_total − DAO Fee
 ```
 
-Worked example — rollover 20, 5 players, price 10 ⇒ pool **70**, DAO fee **3**, winner **67**
+Worked example - rollover 20, 5 players, price 10 ⇒ pool **70**, DAO fee **3**, winner **67**
 (asserted in `contracts/test/DLottery.test.ts`).
 
-## Quick start — full stack with Docker
+## Quick start - full stack with Docker
 
 ```bash
 docker compose up --build
@@ -41,11 +41,11 @@ docker compose up --build
 
 This starts:
 
-- **chain** — a Hardhat node on `:8545` with USD8 + DLottery auto-deployed at deterministic
+- **chain** - a Hardhat node on `:8545` with USD8 + DLottery auto-deployed at deterministic
   addresses, seeding several test accounts with USD8.
-- **postgres** — on `:5432`.
-- **backend** — indexer + REST API on `:8080`.
-- **frontend** — served on `http://localhost:5173`.
+- **postgres** - on `:5432`.
+- **backend** - indexer + REST API on `:8080`.
+- **frontend** - served on `http://localhost:5173`.
 
 Point a Web3 wallet (e.g. MetaMask) at **chain id 31337 / http://localhost:8545**, import a
 Hardhat test account private key, and play. Try the API directly:
@@ -60,7 +60,7 @@ Deterministic addresses on a fresh node: USD8 `0x5FbDB231…80aa3`, DLottery `0x
 ## Manual / dev workflow
 
 ```bash
-# 1. Contracts — compile, test, run a node, deploy
+# 1. Contracts - compile, test, run a node, deploy
 cd contracts
 npm install
 npm test                         # 26 tests covering SC-01..26 + worked example

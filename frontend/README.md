@@ -1,4 +1,4 @@
-# DLottery — Frontend
+# DLottery - Frontend
 
 React + Vite + TypeScript dApp using **wagmi/viem**. Implements PRD section 4.
 
@@ -12,7 +12,7 @@ React + Vite + TypeScript dApp using **wagmi/viem**. Implements PRD section 4.
 | Detect participation      | FE-04             | `useCurrentDraw.myTicket`, `BuyTicket.tsx` |
 | Enable/disable by status  | FE-05             | `Dashboard.tsx`, `BuyTicket.tsx` |
 | Active draw dashboard     | 4.2               | `Dashboard.tsx` |
-| 1–10 allocation table     | 4.2               | `AllocationTable.tsx` |
+| 1-10 allocation table     | 4.2               | `AllocationTable.tsx` |
 | Purchase flow             | 4.3 / 5.2         | `BuyTicket.tsx` (balance → allowance → approve → buy → status → number → lock) |
 | Perform Lottery Draw      | 4.4               | `PerformDraw.tsx` (loading animation + confirmation) |
 | Winner / no-winner views  | 4.5               | `ResultView.tsx` |

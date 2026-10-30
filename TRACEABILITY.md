@@ -16,7 +16,7 @@ Maps every PRD requirement identifier to its implementation and, where applicabl
 | SC-08 | Validate status + 24-hour deadline before purchase     | `buyTicket` (`DrawNotActive`/`DrawExpired`)         | “rejects after deadline”, “not active” |
 | SC-09 | Enforce maximum participant limit (5)                  | `buyTicket` (`DrawFull`)                            | “enforces the maximum participant limit” |
 | SC-10 | One ticket per wallet per draw                         | `buyTicket` (`AlreadyParticipating`)               | “only one ticket per wallet” |
-| SC-11 | Assign a unique ticket number 1–10                     | `buyTicket` (range check + `_numberOwner`)          | “ticket number must be within 1..10” |
+| SC-11 | Assign a unique ticket number 1-10                     | `buyTicket` (range check + `_numberOwner`)          | “ticket number must be within 1..10” |
 | SC-12 | Prevent duplicate ticket numbers                       | `buyTicket` (`TicketNumberTaken`)                  | “prevents duplicate ticket numbers” |
 | SC-13 | Emit an event per ticket purchase                      | `TicketBought`                                      | “emits TicketBought” |
 | SC-14 | Draw only when eligible for settlement                 | `performDraw` + `_isEligibleForDraw`                | “cannot draw before eligible”, “eligible when full” |
@@ -36,7 +36,7 @@ Maps every PRD requirement identifier to its implementation and, where applicabl
 ### Required events (PRD §2.5)
 
 `DrawStarted`, `TicketBought`, `LotteryDrawn`, `DrawCancelled`, `PrizeClaimed`,
-`RefundClaimed` — all declared and emitted in `DLottery.sol`.
+`RefundClaimed` - all declared and emitted in `DLottery.sol`.
 
 ## Backend (PRD §3)
 
@@ -74,7 +74,7 @@ schema in `migrations/0001_init.sql`.
 | FE-03 | Display USD8 balance                | `components/WalletBar.tsx` + `hooks/useLottery.ts` (`useUSD8`) |
 | FE-04 | Detect participation status         | `hooks/useLottery.ts` (`myTicket`), `components/BuyTicket.tsx` |
 | FE-05 | Enable/disable by draw status       | `components/Dashboard.tsx`, `components/BuyTicket.tsx` |
-| 4.2   | Active draw dashboard + 1–10 table  | `components/Dashboard.tsx`, `components/AllocationTable.tsx` |
+| 4.2   | Active draw dashboard + 1-10 table  | `components/Dashboard.tsx`, `components/AllocationTable.tsx` |
 | 4.3   | Purchase flow (balance→allowance→approve→buy→status→number→lock) | `components/BuyTicket.tsx` |
 | 4.4   | Perform Lottery Draw (+ loading)    | `components/PerformDraw.tsx` |
 | 4.5   | Winner / no-winner / refund views   | `components/ResultView.tsx`, `components/RefundView.tsx`, `components/LatestResult.tsx` |

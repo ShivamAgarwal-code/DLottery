@@ -434,7 +434,7 @@ contract DLottery is Ownable, ReentrancyGuard {
             draw.participantCount >= MAX_PARTICIPANTS || block.timestamp > draw.endTime;
     }
 
-    /// @dev Pseudo-random lucky number in [1, 10]. MVP only — see contract-level note.
+    /// @dev Pseudo-random lucky number in [1, 10]. MVP only - see contract-level note.
     function _generateLuckyNumber(Draw storage draw) private view returns (uint8) {
         uint256 entropy = uint256(
             keccak256(

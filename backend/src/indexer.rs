@@ -99,7 +99,7 @@ async fn process_log(pool: &PgPool, log: &RawLog) -> Result<()> {
     let topic0 = log.topics[0];
     let event_type = event_name(topic0);
     let Some(event_type) = event_type else {
-        // Unknown/irrelevant event — ignore.
+        // Unknown/irrelevant event - ignore.
         return Ok(());
     };
 

@@ -60,7 +60,7 @@ impl RpcClient {
                 Ok(resp) => match resp.json::<Value>().await {
                     Ok(v) => {
                         if let Some(err) = v.get("error") {
-                            // RPC-level error (e.g. range too large) — do not spin forever.
+                            // RPC-level error (e.g. range too large) - do not spin forever.
                             bail!("rpc error for {method}: {err}");
                         }
                         return v

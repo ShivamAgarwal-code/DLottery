@@ -22,7 +22,11 @@ frontend/.vite/
 # Env / secrets
 .env
 .env.local
+.env.neon
 *.local
+
+# Neon local context (contains project/branch ids)
+.neon
 
 # Editor / OS
 .DS_Store
@@ -32,3 +36,4 @@ frontend/.vite/
 
 # Logs
 *.log
+.neon

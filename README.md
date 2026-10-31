@@ -43,6 +43,24 @@ flowchart LR
 The frontend reads **live** draw state straight from the contract and fetches **history**
 from the backend. The backend only indexes events into Postgres - it never controls funds.
 
+## Managed Postgres (Neon)
+
+The backend runs against **Neon (Lakebase Postgres)** as a drop-in `DATABASE_URL`:
+
+```bash
+# 1. Create backend/.env.neon from backend/.env.neon.example
+#    DATABASE_URL = Neon DIRECT (unpooled) string + ?sslmode=require
+# 2. Run the indexer against Neon + the Sepolia contract:
+docker compose -f docker-compose.neon.yml up --build
+```
+
+**Direct (unpooled) connection is used on purpose:** this backend is a single long-running
+`sqlx` server that keeps its own pool and runs migrations on startup. Neon's pooled
+(PgBouncer transaction-mode) endpoint breaks session-level prepared statements and
+migrations, so the direct endpoint is correct here; the pooled endpoint is for
+serverless/connection-per-request workloads. (Neon agent skills + MCP are configured under
+`.claude/skills/` and `.mcp.json`.)
+
 ## Draw lifecycle (state machine - PRD 5.1)
 
 ```mermaid

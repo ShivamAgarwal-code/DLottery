@@ -1,0 +1,17 @@
+# Runs the backend indexer against Neon (Lakebase Postgres) + the Sepolia contract.
+# No local Postgres - the database is managed by Neon.
+#
+#   1. Create backend/.env.neon from backend/.env.neon.example
+#      (DATABASE_URL = Neon DIRECT/unpooled connection string with ?sslmode=require)
+#   2. docker compose -f docker-compose.neon.yml up --build
+#
+# Frontend: `cd frontend && npm run dev` (frontend/.env points at Sepolia).
+
+services:
+  backend:
+    build:
+      context: ./backend
+    env_file:
+      - backend/.env.neon
+    ports:
+      - "8080:8080"

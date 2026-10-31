@@ -43,7 +43,12 @@ impl Config {
             // Max span of a single eth_getLogs request.
             max_block_range: parse_u64("MAX_BLOCK_RANGE", 2000)?,
             poll_interval_secs: parse_u64("POLL_INTERVAL_SECS", 5)?,
-            http_addr: env_or("HTTP_ADDR", "0.0.0.0:8080"),
+            // Hosts like Render/Railway/Fly inject a PORT env var the service must bind to.
+            // Prefer it; otherwise fall back to HTTP_ADDR (default 0.0.0.0:8080).
+            http_addr: match std::env::var("PORT") {
+                Ok(port) if !port.is_empty() => format!("0.0.0.0:{port}"),
+                _ => env_or("HTTP_ADDR", "0.0.0.0:8080"),
+            },
         })
     }
 }

@@ -1,0 +1,48 @@
+# Runs the backend indexer + Postgres against the live Sepolia deployment.
+# No local chain service - it indexes the public testnet contract.
+#
+#   docker compose -f docker-compose.sepolia.yml up --build
+#
+# Frontend: run `cd frontend && npm run dev` (frontend/.env already points at Sepolia),
+# then connect MetaMask on the Sepolia network.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: dlottery
+      POSTGRES_PASSWORD: dlottery
+      POSTGRES_DB: dlottery
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_sepolia:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dlottery"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://dlottery:dlottery@postgres:5432/dlottery
+      RPC_URL: https://ethereum-sepolia-rpc.publicnode.com
+      CONTRACT_ADDRESS: "0xB8f3f30C26588a9914a575A3e9105F57F6D7BA95"
+      START_BLOCK: "12033152"
+      # Sepolia can reorg; wait a few confirmations and keep a rewind buffer.
+      CONFIRMATIONS: "3"
+      REORG_DEPTH: "12"
+      MAX_BLOCK_RANGE: "2000"
+      POLL_INTERVAL_SECS: "10"
+      HTTP_ADDR: "0.0.0.0:8080"
+      RUST_LOG: "info,dlottery_backend=debug,sqlx=warn"
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata_sepolia:

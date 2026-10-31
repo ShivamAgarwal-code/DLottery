@@ -78,6 +78,28 @@ cp .env.example .env             # set addresses + VITE_BACKEND_URL
 npm install && npm run dev       # http://localhost:5173
 ```
 
+## Live testnet deployment (Sepolia)
+
+The contracts are deployed and verified-working on the **Sepolia** testnet (chain `11155111`):
+
+| Contract  | Address |
+| --------- | ------- |
+| USD8      | [`0x433f594eA97219bE1e01be4050B63AFDAA6b4F9b`](https://sepolia.etherscan.io/address/0x433f594eA97219bE1e01be4050B63AFDAA6b4F9b) |
+| DLottery  | [`0xB8f3f30C26588a9914a575A3e9105F57F6D7BA95`](https://sepolia.etherscan.io/address/0xB8f3f30C26588a9914a575A3e9105F57F6D7BA95) |
+
+Run the stack against Sepolia:
+
+```bash
+# Backend indexer + Postgres pointed at the live Sepolia contract
+docker compose -f docker-compose.sepolia.yml up --build
+
+# Frontend (frontend/.env already points at Sepolia)
+cd frontend && npm run dev
+```
+
+Then switch MetaMask to the **Sepolia** network and connect. Deploy it yourself with your
+own key via `cd contracts && npm run deploy:sepolia` (see `contracts/.env.example`).
+
 ## Draw lifecycle (PRD 5.1)
 
 ```

@@ -14,6 +14,84 @@ stack.
 > The smart contract is the authoritative source of all lottery and financial state. The
 > backend is a **passive** indexer - it never determines results or controls funds.
 
+## Architecture
+
+```mermaid
+flowchart LR
+  U([User / Web3 Wallet])
+  subgraph Client
+    FE[Frontend<br/>React + wagmi/viem]
+  end
+  subgraph OnChain[On-chain - authoritative]
+    SC[DLottery.sol + USD8.sol]
+    CH[(EVM Chain<br/>Hardhat / Sepolia)]
+  end
+  subgraph Offchain[Off-chain - read-only]
+    BE[Backend Indexer + REST API<br/>Rust: axum + alloy + sqlx]
+    DB[(PostgreSQL<br/>draw history)]
+  end
+
+  U -->|connect, buy, draw, claim| FE
+  FE -->|read state + send txs| SC
+  SC --- CH
+  FE -->|GET /api/v1/draws/*| BE
+  CH -->|emit events| SC
+  BE -->|eth_getLogs poll| CH
+  BE --> DB
+```
+
+The frontend reads **live** draw state straight from the contract and fetches **history**
+from the backend. The backend only indexes events into Postgres - it never controls funds.
+
+## Draw lifecycle (state machine - PRD 5.1)
+
+```mermaid
+stateDiagram-v2
+  [*] --> ACTIVE: start draw<br/>(rollover carried in)
+  ACTIVE --> ACTIVE: buyTicket<br/>(1 per wallet, number 1-10)
+  ACTIVE --> CANCELLED: performDraw &<br/>participants < min
+  ACTIVE --> COMPLETED: performDraw &<br/>ticket matches lucky number
+  ACTIVE --> NO_WINNER: performDraw &<br/>no match
+  CANCELLED --> ACTIVE: next draw<br/>(principals refundable)
+  NO_WINNER --> ACTIVE: next draw<br/>(pool rolls over)
+  COMPLETED --> ACTIVE: next draw
+```
+
+## Ticket purchase flow (PRD 4.3 / 5.2)
+
+```mermaid
+sequenceDiagram
+  actor U as User
+  participant FE as Frontend
+  participant T as USD8 (ERC-20)
+  participant L as DLottery
+  U->>FE: pick number (1-10)
+  FE->>T: balanceOf / allowance
+  alt allowance < price
+    U->>T: approve(DLottery, price)
+  end
+  U->>L: buyTicket(number)
+  L->>T: transferFrom(user -> contract, 10 USD8)
+  L-->>FE: emit TicketBought
+  FE-->>U: show assigned number, lock re-purchase
+```
+
+## Settlement & economics (PRD 5.4-5.6)
+
+```mermaid
+flowchart TD
+  A[performDraw<br/>eligible: 5 joined or 24h] --> B{participants >= min?}
+  B -- no --> C[CANCELLED<br/>refunds enabled]
+  B -- yes --> D[generate lucky number 1-10]
+  D --> E{number held by someone?}
+  E -- no --> F[NO_WINNER<br/>pool rolls to next draw]
+  E -- yes --> G[COMPLETED]
+  G --> H["pool = rollover + N x price"]
+  H --> I["netProfit = pool - price"]
+  I --> J["daoFee = 5% x netProfit"]
+  J --> K["winner = pool - daoFee"]
+```
+
 ## Core rules (PRD 1.3)
 
 Payment token USD8 · ticket price 10 USD8 · max 5 participants · numbers 1-10 · one ticket

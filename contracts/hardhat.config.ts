@@ -3,8 +3,15 @@ import "@nomicfoundation/hardhat-toolbox";
 import "dotenv/config";
 
 // Testnet credentials are read from contracts/.env (gitignored). See .env.example.
-const PRIVATE_KEY = process.env.PRIVATE_KEY?.trim();
-const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL?.trim() || "https://rpc.sepolia.org";
+const RAW_KEY = process.env.PRIVATE_KEY?.trim();
+// Hardhat requires a 0x-prefixed private key; normalize so either form works.
+const PRIVATE_KEY = RAW_KEY
+  ? RAW_KEY.startsWith("0x")
+    ? RAW_KEY
+    : `0x${RAW_KEY}`
+  : undefined;
+const SEPOLIA_RPC_URL =
+  process.env.SEPOLIA_RPC_URL?.trim() || "https://ethereum-sepolia-rpc.publicnode.com";
 const accounts = PRIVATE_KEY ? [PRIVATE_KEY] : [];
 
 const config: HardhatUserConfig = {

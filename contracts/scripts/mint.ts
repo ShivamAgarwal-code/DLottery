@@ -1,10 +1,10 @@
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import * as fs from "fs";
 import * as path from "path";
 
 /**
  * Mint test USD8 to an address (owner-only mint). Usage:
- *   TO=0x... AMOUNT=10000 npx hardhat run scripts/mint.ts --network localhost
+ *   TO=0x... AMOUNT=10000 npx hardhat run scripts/mint.ts --network sepolia
  */
 async function main() {
   const to = process.env.TO;
@@ -12,7 +12,10 @@ async function main() {
   if (!to) throw new Error("set TO=0x... (recipient address)");
 
   const dep = JSON.parse(
-    fs.readFileSync(path.join(__dirname, "..", "deployments", "localhost.json"), "utf8")
+    fs.readFileSync(
+      path.join(__dirname, "..", "deployments", `${network.name}.json`),
+      "utf8"
+    )
   );
   const usd8 = await ethers.getContractAt("USD8", dep.contracts.USD8.address);
 
